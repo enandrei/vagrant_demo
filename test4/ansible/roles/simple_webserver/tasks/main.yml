@@ -1,0 +1,29 @@
+---
+- name: Ensure /var/www exists
+  file:
+    path: /var/www
+    owner: www-data
+    group: www-data
+    state: directory
+    mode: '0755'
+
+- name: Create basic index page
+  template:
+    src: index.html.j2
+    dest: /var/www/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Ensure systemd startup script exists
+  template:
+    src: simplehttp.service.j2
+    dest: /lib/systemd/system/simplehttp.service
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Ensure simplehttp is started
+  service:
+    name: simplehttp
+    state: started

@@ -1,0 +1,7 @@
+---
+- name: run echo on the remote machine
+  shell: echo "I am $USER writing from $(hostname) ."
+  register: warcry
+  changed_when: False
+
+- debug: msg="{{ warcry.stdout }}"

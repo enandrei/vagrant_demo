@@ -1,0 +1,30 @@
+---
+- name: Install latest nginx
+  apt:
+    name: nginx
+    state: latest
+  notify:
+    - Start Nginx
+
+- name: Make sure default server is not enabled
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify:
+    - Reload Nginx
+
+- name: Create configuration for our web servers
+  template:
+    src: web.j2
+    dest: /etc/nginx/sites-available/web
+    mode: '0644'
+  notify:
+    - Reload Nginx
+
+- name: Enable configuration for our web servers
+  file: 
+    src=/etc/nginx/sites-available/web
+    dest=/etc/nginx/sites-enabled/web
+    state=link  
+  notify:
+    - Reload Nginx

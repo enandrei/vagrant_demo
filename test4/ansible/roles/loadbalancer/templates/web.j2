@@ -1,0 +1,9 @@
+upstream backend {
+        server 172.30.30.201:8080;
+        server 172.30.30.202:8080;
+}
+server {
+        location / {
+                proxy_pass http://backend;
+        }
+}
