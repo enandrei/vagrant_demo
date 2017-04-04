@@ -1,11 +1,4 @@
 ---
-- name: Install latest nginx
-  apt:
-    name: nginx
-    state: latest
-  notify:
-    - Start Nginx
-
 - name: Make sure default server is not enabled
   file:
     path: "/etc/nginx/sites-enabled/default"

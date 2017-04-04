@@ -1,0 +1,38 @@
+---
+- name: Ensure dir init.groovy.d exists
+  file:
+    path: /var/lib/jenkins/init.groovy.d
+    owner: jenkins
+    group: jenkins
+    state: directory
+    mode: '0755'
+
+- name: Disable jenkins setup daemon UpgradeWizard file
+  copy:
+    content: '2.50'
+    dest: /var/lib/jenkins/jenkins.install.UpgradeWizard.state
+    mode: '0644'
+    owner: jenkins
+    group: jenkins
+  notify:
+    - Restart Jenkins
+
+- name: Disable jenkins setup daemon InstallUtil file
+  copy:
+    content: '2.50'
+    dest: /var/lib/jenkins/jenkins.install.InstallUtil.lastExecVersion
+    mode: '0644'
+    owner: jenkins
+    group: jenkins
+  notify:
+    - Restart Jenkins
+
+- name: Create configuration for jenkins admin user
+  template:
+    src: basic-security.groovy.j2
+    dest: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    mode: '0644'
+    owner: jenkins
+    group: jenkins
+  notify:
+    - Restart Jenkins

@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
         machine.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=700,fmode=700"] #ansible was complaining about key permissions
 
         machine.vm.provider "virtualbox" do |v|
-            v.memory = 512
+            v.memory = 1024
             v.cpus = 1
         end
 
@@ -54,7 +54,6 @@ Vagrant.configure("2") do |config|
             ansible.playbook       = "playbook.yml"
             ansible.verbose        = false
             ansible.limit          = "all"
-            ansible.version        = "2.1.1.0-1~ubuntu16.04.1"
             ansible.inventory_path = "inventory"
         end
     end

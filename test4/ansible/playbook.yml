@@ -3,19 +3,27 @@
   gather_facts: False
   pre_tasks:
   - name: Install python for Ansible
-    raw: test -e /usr/bin/python || (sudo apt update && sudo apt install -y python-minimal)
+    raw: test -e /usr/bin/python || (apt update && apt install -y python-minimal)
     changed_when: False
   - setup: # aka gather_facts
   roles:
     - warcry
     - use_apt_proxy
+  become: yes
     
 - hosts: lb
   roles:
-    - loadbalancer
+    - nginx_install
+    - nginx_configure
   become: yes
 
 - hosts: web
   roles:
     - simple_webserver
+  become: yes
+
+- hosts: controller
+  roles:
+    - jenkins_install
+    - jenkins_configure
   become: yes

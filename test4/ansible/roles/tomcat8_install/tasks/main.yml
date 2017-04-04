@@ -1,0 +1,7 @@
+---
+- name: Install latest tomcat8
+  apt:
+    name: tomcat8
+    state: latest
+  notify:
+    - Start Tomcat8
