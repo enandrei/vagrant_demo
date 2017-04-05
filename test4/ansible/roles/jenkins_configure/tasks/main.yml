@@ -36,3 +36,18 @@
     group: jenkins
   notify:
     - Restart Jenkins
+
+- name: Run all handlers registered until now
+  meta: flush_handlers
+
+- name: Wait for Jenkins to start up before installing plugins.
+  shell: "curl -D - --silent --max-time 5 http://localhost:8080/cli/"
+  register: result
+  until: (result.stdout.find("403 Forbidden") != -1) or (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: "5"
+  delay: "20"
+  changed_when: false
+  always_run: yes
+
+- name: Install Jenkins plugins
+  shell: "/usr/bin/java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ install-plugin greenballs git job-dsl unicorn --username jenkins --password jenkins -restart"

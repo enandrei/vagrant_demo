@@ -14,4 +14,9 @@ instance.setSecurityRealm(hudsonRealm)
 def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
 strategy.setAllowAnonymousRead(false)
 instance.setAuthorizationStrategy(strategy)
+
+// Set JNLP port, cli needs this so it doesn't timeout. 
+println "--> setting JNLP port to 36363"
+instance.setSlaveAgentPort(36363)
+
 instance.save()
