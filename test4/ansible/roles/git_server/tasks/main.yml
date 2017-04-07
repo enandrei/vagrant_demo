@@ -59,6 +59,10 @@
 ### Simulating user action for commiting files to repo
 ###
 
+- name: add localhost to known_hosts - user jenkins
+  shell: 'ssh-keyscan remote_server > ~/.ssh/known_hosts'
+  become_user: jenkins
+
 - name: Add git group
   group:
     name: development
@@ -89,6 +93,21 @@
     dest: /home/dev1/dev
     accept_hostkey: yes
   become_user: dev1
+  ignore_errors: true
+  register: output
+
+- name: Check the error from git module
+  fail: msg="{{ output.msg }}"
+  when: "'Failed to checkout branch master' not in output.msg"
+
+
+- name: Ensure dir /home/dev1/dev/web exists
+  file:
+    path: /home/dev1/dev/web
+    owner: dev1
+    group: development
+    state: directory
+    mode: '0755'
 
 - name: Copy repo files for first commit
   copy:
@@ -97,3 +116,8 @@
     dest: /home/dev1/dev
     owner: dev1
     group: development
+
+- name: Commit basic files to the repo
+  shell: 'ssh-keygen -R localhost && cd /home/dev1/dev && git config --global user.name "Dev One" && git add . && git commit -m "First commit" && GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push'
+  become_user: dev1
+
