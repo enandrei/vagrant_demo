@@ -5,3 +5,8 @@
   changed_when: False
 
 - debug: msg="{{ warcry.stdout }}"
+
+- name: Set password for user ubuntu
+  user:
+    name: ubuntu
+    password: '$6$FgOGQsaP$U2qZLAulMu9CnFFPxgldA7vuD6B1pcpJZdMINO45/Gjua3wcG6jA0HkZTtxOxzgqyvvA8/iJgWTwQQ1HO2hbY/'

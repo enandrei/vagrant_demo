@@ -1,0 +1,22 @@
+---
+- name: Install latest Unzip
+  apt:
+    name: unzip
+    state: latest
+
+- name: Ensure dir /var/lib/jenkins/vnu exists
+  file:
+    path: /var/lib/jenkins/vnu
+    owner: jenkins
+    group: jenkins
+    state: directory
+    mode: '0755'
+
+- name: Unzip VNU checker to jenkins user
+  unarchive:
+    #src: https://github.com/validator/validator/releases/download/17.3.0/vnu.jar_17.3.0.zip
+    src: vnu.jar_17.3.0.zip
+    dest: /var/lib/jenkins/vnu
+    #remote_src: True
+    owner: jenkins
+    group: jenkins

@@ -1,0 +1,20 @@
+#!/usr/bin/env groovy
+node {
+    stage('Preparation') {
+	// Get some code from a repository
+	git 'git@localhost:/repo/dev.git'
+    }
+    stage('Build') {
+	sh 'echo "This is html, nothing to build ..." && sleep 5'
+    }
+    stage('QA') {
+	sh '/usr/bin/java -jar /var/lib/jenkins/vnu/dist/vnu.jar --html --verbose web/*'
+    }
+    stage('Publish') {
+	sh 'echo "This is html, nothing to publish to an artifact repository ..." && sleep 2'
+    }
+    stage('Deploy') {
+	//Deploy with ansible from the same repository
+	sh '/usr/bin/ansible-playbook -i inventory playbook.yml'
+    }
+}

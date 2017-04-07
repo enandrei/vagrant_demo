@@ -1,0 +1,26 @@
+#!groovy
+
+import javaposse.jobdsl.dsl.DslScriptLoader
+import javaposse.jobdsl.plugin.JenkinsJobManagement
+
+def jobDslScript = """
+                pipelineJob('web_pipe') {
+                    definition {
+                        cpsScm {
+                            scm{
+                                git('git@localhost:/repo/dev.git')
+                            }            
+                            scriptPath('Jenkinsfile')
+                        }
+                    }
+                    configure { project ->
+                        (project / 'authToken').setValue('pipetoken')
+                    }
+                }
+                """.stripIndent()
+                
+def workspace = new File('.')
+
+def jobManagement = new JenkinsJobManagement(System.out, [:], workspace)
+
+new DslScriptLoader(jobManagement).runScript(jobDslScript)

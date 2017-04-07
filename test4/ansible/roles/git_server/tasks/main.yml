@@ -1,0 +1,99 @@
+---
+- name: Add git group
+  group:
+    name: git
+    state: present
+
+- name: Add git user
+  user:
+    name: git
+    group: git
+    shell: /usr/bin/git-shell
+    state: present
+
+- name: Generate ssh key for jenkins user
+  user: 
+    name: jenkins
+    generate_ssh_key: yes
+    state: present
+
+- name: Ensure dir /repo exists
+  file:
+    path: /repo
+    owner: git
+    group: git
+    state: directory
+    mode: '2755'
+
+- name: Read jenkins user pub key
+  slurp:
+    src: /var/lib/jenkins/.ssh/id_rsa.pub
+  register: jenkins_pub
+
+- name: Grant jenkins user access to git
+  authorized_key:
+    user: git
+    state: present
+    key: "{{ jenkins_pub['content'] | b64decode }}"
+
+- name: Creating dev git repository
+  shell: "git init --bare /repo/dev.git"
+
+- name: Updating repo permissions
+  file: 
+    path: /repo/dev.git
+    recurse: yes
+    owner: git
+
+- name: Create pipeline job hook
+  template:
+    src: post-receive.j2
+    dest: /repo/dev.git/hooks/post-receive
+    owner: git
+    group: git
+    mode: '0755'
+
+
+### 
+### Adding a user for use by development and
+### Simulating user action for commiting files to repo
+###
+
+- name: Add git group
+  group:
+    name: development
+    state: present
+
+- name: Add git user
+  user:
+    name: dev1
+    group: development
+    password: '$6$FgOGQsaP$U2qZLAulMu9CnFFPxgldA7vuD6B1pcpJZdMINO45/Gjua3wcG6jA0HkZTtxOxzgqyvvA8/iJgWTwQQ1HO2hbY/'
+    generate_ssh_key: yes
+    state: present
+
+- name: Read dev1 user pub key
+  slurp:
+    src: /home/dev1/.ssh/id_rsa.pub
+  register: dev1_pub
+
+- name: Grant dev1 user access to git
+  authorized_key:
+    user: git
+    state: present
+    key: "{{ dev1_pub['content'] | b64decode }}"
+
+- name: Checkout the bare repo
+  git:
+    repo: ssh://git@localhost:/repo/dev.git
+    dest: /home/dev1/dev
+    accept_hostkey: yes
+  become_user: dev1
+
+- name: Copy repo files for first commit
+  copy:
+    directory_mode: yes
+    src: dev/
+    dest: /home/dev1/dev
+    owner: dev1
+    group: development

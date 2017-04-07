@@ -26,4 +26,6 @@
   roles:
     - jenkins_install
     - jenkins_configure
+    - jenkins_custom
+    - git_server
   become: yes

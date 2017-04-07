@@ -50,4 +50,14 @@
   always_run: yes
 
 - name: Install Jenkins plugins
-  shell: "/usr/bin/java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ install-plugin greenballs git job-dsl unicorn --username jenkins --password jenkins -restart"
+  shell: "/usr/bin/java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ install-plugin greenballs git job-dsl workflow-aggregator --username jenkins --password jenkins -restart"
+
+- name: Create configuration for web_pipe job
+  template:
+    src: pipeline.groovy.j2
+    dest: /var/lib/jenkins/init.groovy.d/pipeline.groovy
+    mode: '0644'
+    owner: jenkins
+    group: jenkins
+  notify:
+    - Restart Jenkins

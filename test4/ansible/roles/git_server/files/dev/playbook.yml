@@ -1,0 +1,11 @@
+---
+- hosts: web
+  tasks:
+    - name: Update index page
+      template:
+        src: web/index.html
+        dest: /var/www/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      become: yes
