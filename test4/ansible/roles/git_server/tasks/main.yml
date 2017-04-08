@@ -60,7 +60,7 @@
 ###
 
 - name: add localhost to known_hosts - user jenkins
-  shell: 'ssh-keyscan remote_server > ~/.ssh/known_hosts'
+  shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
   become_user: jenkins
 
 - name: Add git group
