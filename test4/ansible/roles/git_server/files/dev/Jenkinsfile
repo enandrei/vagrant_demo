@@ -13,7 +13,7 @@ node {
     stage('Publish') {
 	sh 'echo "This is html, nothing to publish to an artifact repository ..." && sleep 2'
     }
-    stage('Deploy') {
+    stage('Release') {
 	//Deploy with ansible from the same repository
 	sh '/usr/bin/ansible-playbook -i inventory playbook.yml'
     }

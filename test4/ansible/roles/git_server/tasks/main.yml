@@ -36,6 +36,10 @@
     state: present
     key: "{{ jenkins_pub['content'] | b64decode }}"
 
+- name: add localhost to known_hosts - user jenkins
+  shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
+  become_user: jenkins
+
 - name: Creating dev git repository
   shell: "git init --bare /repo/dev.git"
 
@@ -58,10 +62,6 @@
 ### Adding a user for use by development and
 ### Simulating user action for commiting files to repo
 ###
-
-- name: add localhost to known_hosts - user jenkins
-  shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
-  become_user: jenkins
 
 - name: Add git group
   group:
@@ -86,6 +86,10 @@
     user: git
     state: present
     key: "{{ dev1_pub['content'] | b64decode }}"
+
+- name: add localhost to known_hosts - user dev1
+  shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
+  become_user: dev1
 
 - name: Checkout the bare repo
   git:
@@ -118,6 +122,6 @@
     group: development
 
 - name: Commit basic files to the repo
-  shell: 'ssh-keygen -R localhost && cd /home/dev1/dev && git config --global user.name "Dev One" && git add . && git commit -m "First commit" && GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push'
+  shell: 'cd /home/dev1/dev && git config --global user.name "Dev One" && git add . && git commit -m "First commit" && git push'
   become_user: dev1
 
