@@ -40,35 +40,40 @@
   shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
   become_user: jenkins
 
-- name: Creating dev git repository
-  shell: "git init --bare /repo/dev.git"
+- name: Check /repo/dev.git already exists  
+  stat: path=/repo/dev.git
+  register: dev_bare_repo
 
-- name: Updating repo permissions
-  file: 
-    path: /repo/dev.git
-    recurse: yes
-    owner: git
+- block:
+  - name: Creating dev git repository
+    shell: "git init --bare /repo/dev.git"
 
-- name: Create pipeline job hook
-  template:
-    src: post-receive.j2
-    dest: /repo/dev.git/hooks/post-receive
-    owner: git
-    group: git
-    mode: '0755'
+  - name: Updating repo permissions
+    file: 
+      path: /repo/dev.git
+      recurse: yes
+      owner: git
 
+  - name: Ensure pipeline job hook exists
+    template:
+      src: post-receive.j2
+      dest: /repo/dev.git/hooks/post-receive
+      owner: git
+      group: git
+      mode: '0755'
+  when: dev_bare_repo.stat.isdir is not defined
 
 ### 
 ### Adding a user for use by development and
 ### Simulating user action for commiting files to repo
 ###
 
-- name: Add git group
+- name: Ensure git group exists
   group:
     name: development
     state: present
 
-- name: Add git user
+- name: Ensure git user exists
   user:
     name: dev1
     group: development
@@ -91,37 +96,44 @@
   shell: 'ssh-keyscan localhost > ~/.ssh/known_hosts'
   become_user: dev1
 
-- name: Checkout the bare repo
-  git:
-    repo: ssh://git@localhost:/repo/dev.git
-    dest: /home/dev1/dev
-    accept_hostkey: yes
-  become_user: dev1
-  ignore_errors: true
-  register: output
+- name: Check /home/dev1/dev already exists  
+  stat: path=/home/dev1/dev
+  register: dev_checkout
 
-- name: Check the error from git module
-  fail: msg="{{ output.msg }}"
-  when: "'Failed to checkout branch master' not in output.msg"
+- block:
+  - name: Checkout the bare repo
+    git:
+      repo: ssh://git@localhost:/repo/dev.git
+      dest: /home/dev1/dev
+      accept_hostkey: yes
+    become_user: dev1
+    ignore_errors: true
+    register: output
+
+  - name: Check the error from git module
+    fail: msg="{{ output.msg }}"
+    when: "'Failed to checkout branch master' not in output.msg"
 
 
-- name: Ensure dir /home/dev1/dev/web exists
-  file:
-    path: /home/dev1/dev/web
-    owner: dev1
-    group: development
-    state: directory
-    mode: '0755'
+  - name: Ensure dir /home/dev1/dev/web exists
+    file:
+      path: /home/dev1/dev/web
+      owner: dev1
+      group: development
+      state: directory
+      mode: '0755'
 
-- name: Copy repo files for first commit
-  copy:
-    directory_mode: yes
-    src: dev/
-    dest: /home/dev1/dev
-    owner: dev1
-    group: development
+  - name: Copy repo files for first commit
+    copy:
+      directory_mode: yes
+      src: dev/
+      dest: /home/dev1/dev
+      owner: dev1
+      group: development
 
-- name: Commit basic files to the repo
-  shell: 'cd /home/dev1/dev && git config --global user.name "Dev One" && git add . && git commit -m "First commit" && git push'
-  become_user: dev1
+  - name: Commit basic files to the repo
+    shell: 'cd /home/dev1/dev && git config --global user.name "Dev One" && git add . && git commit -m "First commit" && git push'
+    become_user: dev1
+  when: dev_checkout.stat.isdir is not defined
+
 
