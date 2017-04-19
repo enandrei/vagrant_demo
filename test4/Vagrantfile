@@ -27,7 +27,7 @@ servers=[
         :disable_synced_folder => true
     },
     {
-        :hostname => "controller",
+        :hostname => "control",
         :ip => BRIDGE_NET + "30",
         :box => "ubuntu/xenial64",
         :ram => 1024,
